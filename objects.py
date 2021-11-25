@@ -3,8 +3,10 @@ class Message(object):
     def __init__(self) -> None:
         super().__init__()
 
+        self.sender_address = "0.0.0.0:0"
+        self.receiver_address = "0.0.0.0:0"
         self.id = -1
-        self.type = -1
+        self.type = "NOT_INITIALIZED"
         self.sender_id = -1
         self.status = -1
         self.address = "0.0.0.0:0"

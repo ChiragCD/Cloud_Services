@@ -53,14 +53,62 @@ class Server(object):
 
     def platform_monitor(self, msg):
 
-        pass
+        sender = msg.sender_id
+        if(msg.type == "CONTAINER_HEALTH_UPDATE" and type(self.entities[sender] == Container)):
+            self.entities[sender].health = msg.status
+
+        healthy = 0
+        for container in self.containers:
+            healthy += container.health
+        print(healthy, "healthy containers out of", len(self.containers))
 
     def infrastructure_monitor(self, msg):
 
-        pass
+        sender = msg.sender_id
+        if(msg.type == "MACHINE_HEALTH_UPDATE" and type(self.entities[sender] == Machine)):
+            self.entities[sender].status = msg.status
+
+        healthy = 0
+        for machine in self.machines:
+            healthy += machine.status
+        print(healthy, "healthy machines out of", len(self.machines))
+    
+    def general_update(self, msg):
+
+        sender = msg.sender_id
+
+        if(sender not in self.entities):
+            if(msg.type == "CONTAINER_GENERAL_UPDATE"):
+                container = Container()
+                self.entities[sender] = container
+                self.containers.append(container)
+
+        if(msg.type == "CONTAINER_GENERAL_UPDATE" and type(self.entities[sender]) == Container):
+            self.entities[sender].address = msg.sender_address
+            self.entities[sender].status = msg.status
+            self.entities[sender].health = 1
+            self.entities[sender].family_id = msg.container_family_identity
+
+        ## MACHINE_GENERAL_UPDATE - Optional
+
+        if(sender not in self.entities):
+            if(msg.type == "MACHINE_GENERAL_UPDATE"):
+                machine = Machine()
+                machine_id = len(self.machines) + 1 + 10
+                machine.address = msg.ssender_address
+                machine.id = machine_id
+                self.entities[sender] = machine
+                self.machines.append(machine)
+                ## TODO - sendmsg("""Give machine the new sender_id""")
+
+        if(msg.type == "MACHINE_GENERAL_UPDATE" and type(self.entities[sender]) == Machine):
+            self.entities[sender].address = msg.sender_address
+            self.entities[sender].status = msg.status
+            ## TODO - Other Data
 
     def run(self):
 
+        ## convert udp message to Message object before passing to functions
         pass
 
 if(__name__ == "__main__"):
