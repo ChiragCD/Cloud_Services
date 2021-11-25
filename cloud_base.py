@@ -27,6 +27,38 @@ class Server(object):
         self.machines = [machine1, machine2, machine3]
         self.containers = []
     
+    def start_service(self, msg):
+
+        pass
+
+    def update_client(self, msg):
+
+        pass
+
+    def update_master_node(self, msg):
+
+        pass
+
+    def scaler(self):
+
+        pass
+
+    def distributer(self):
+
+        pass
+
+    def scaling_wrapper(self, msg):
+
+        pass
+
+    def platform_monitor(self, msg):
+
+        pass
+
+    def infrastructure_monitor(self, msg):
+
+        pass
+
     def run(self):
 
         pass
