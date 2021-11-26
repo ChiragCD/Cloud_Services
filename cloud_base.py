@@ -1,5 +1,6 @@
 from objects import *
 import socket
+import pickle
 
 class Server(object):
 
@@ -143,19 +144,19 @@ class Server(object):
             msg_obj = pickle.loads(message)
 
             if(msg_obj.type == "START_SERVICE"):
-                start_service(msg_obj)
+                self.start_service(msg_obj)
             elif(msg_obj.type == "UPDATE_CLIENT"):
-                update_client(msg_obj)
+                self.update_client(msg_obj)
             elif(msg_obj.type == "UPDATE_MASTER_NODE"):
-                update_master_node(msg_obj)
+                self.update_master_node(msg_obj)
             elif(msg_obj.type == "SCALING_WRAPPER"): #idk what else to put here
-                scaling_wrapper(msg_obj)
+                self.scaling_wrapper(msg_obj)
             elif(msg_obj.type == "CONTAINER_HEALTH_UPDATE"):
-                platform_monitor(msg_obj)
+                self.platform_monitor(msg_obj)
             elif(msg_obj.type == "MACHINE_HEALTH_UPDATE"):
-                infrastructure_monitor(msg_obj)
+                self.infrastructure_monitor(msg_obj)
             else:
-                general_update(msg_obj)
+                self.general_update(msg_obj)
         pass
 
 if(__name__ == "__main__"):
