@@ -1,4 +1,5 @@
 from objects import *
+import socket
 
 class Server(object):
 
@@ -32,10 +33,23 @@ class Server(object):
         pass
 
     def update_client(self, msg):
-
-        pass
+        msg.address = msg.sender_address
+        service = get_service_from_worker_id(msg.sender_id) #TODO: implement this
+        client_address = service.client_address
+        client_tuple = (client_address.split(":")[0],client_address.split(":")[1])
+        msg.type = "SERVICE_UP"
+        UDPServerSocket.sendto(msg,client_tuple)
 
     def update_master_node(self, msg):
+        sender = msg.sender_id
+        container = get_container_from_id(sender) #TODO: implement this
+        ms_id = container.family_id
+        ms_container = get_container_from_id(ms_id)
+        ms_address = ms_container.address
+        ms_tuple = (ms_address.split(":")[0],ms_address.split(":")[1])
+        msg.receiver_address = ms_address
+        msg.type = "WORKER_UP"
+        UDPServerSocket.sendto(msg, ms_tuple)
 
         pass
 
@@ -109,6 +123,39 @@ class Server(object):
     def run(self):
 
         ## convert udp message to Message object before passing to functions
+        localIP     = "127.0.0.1"
+        localPort   = 20001
+        bufferSize  = 1024
+
+        UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        UDPServerSocket.bind((localIP, localPort))
+
+        print("UDP server up and listening")
+
+        while(True):
+
+            bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
+
+            message = bytesAddressPair[0] #contains string form of object
+
+            address = bytesAddressPair[1] #contains address of sender
+            
+            msg_obj = pickle.loads(message)
+
+            if(msg_obj.type == "START_SERVICE"):
+                start_service(msg_obj)
+            elif(msg_obj.type == "UPDATE_CLIENT"):
+                update_client(msg_obj)
+            elif(msg_obj.type == "UPDATE_MASTER_NODE"):
+                update_master_node(msg_obj)
+            elif(msg_obj.type == "SCALING_WRAPPER"): #idk what else to put here
+                scaling_wrapper(msg_obj)
+            elif(msg_obj.type == "CONTAINER_HEALTH_UPDATE"):
+                platform_monitor(msg_obj)
+            elif(msg_obj.type == "MACHINE_HEALTH_UPDATE"):
+                infrastructure_monitor(msg_obj)
+            else:
+                general_update(msg_obj)
         pass
 
 if(__name__ == "__main__"):
