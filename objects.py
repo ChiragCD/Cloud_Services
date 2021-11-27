@@ -33,11 +33,7 @@ class Container(object):
         super().__init__()
 
         self.id = -1
-        self.status = -1
-        self.type = -1
         self.health = -1
-        self.address = "0.0.0.0:0"
-        self.family_id = -1
 
 class Service(object):
 

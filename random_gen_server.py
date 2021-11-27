@@ -85,6 +85,8 @@ class RandomGenServer(object):
             running = [worker for worker in self.workers if worker.running == 1]
 
             msg = Message()
+            msg.sender_id = self.id
+            msg.type = "SCALING_DATA"
             msg.data = str(self.family_id) + " " + str(len(running)) + " " + str(len(self.workers))
             # sendmsg(msg, cloudbase)
     
