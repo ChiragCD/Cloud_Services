@@ -14,6 +14,7 @@ class Worker(object):
         self.address = "0.0.0.0:0"
         self.healthy = -1
         self.running = -1
+        self.last_timestamp = time.time()
 
 class RandomGenServer(object):
 
@@ -28,61 +29,74 @@ class RandomGenServer(object):
         self.cloud_base_address = str(sys.argv[4])
         self.client_address = str(sys.argv[5])
 
-        self.workers = []
+        self.workers = dict()
 
     def add_worker(self, msg):
 
         worker = Worker()
         worker.id = msg.sender_id
         worker.address = msg.sender_address
-        worker.id = msg.status
-        self.workers.append(worker)
-
-    def delete_worker(self, msg):
-
-        worker = self.workers[int(msg.data)]
-        worker.health = 0
-        # sendmsg(worker)
+        worker.healthy = 1
+        worker.running = msg.status
+        self.workers[worker.id] = worker
     
     def route_request(self, msg):
 
-        available = [worker for worker in self.workers if worker.running == 0 and worker.healthy == 1]
+        available = [worker for worker in self.workers if self.workers[worker].running == 0 and self.workers[worker].healthy == 1]
+
+        msg.sender_id = self.id
         if(not available):
             print("Dropping request")
-            ## sendmsg(client)
+            msg.type = "REQUEST_DROPPED"
+            ## sendmsg(msg, client)
         decision = random.choice(available)
-        ## sendmsg(decision)
+        msg.type = "USER_REQUEST"
+        ## sendmsg(decision, msg)
     
     def route_reply(self, msg):
 
+        msg.sender_id = self.id
         ## sendmsg(client)
         pass
     
     def status_update(self, msg):
+
+        sender = msg.sender_id
+
+        if(sender not in self.workers):
+            self.add_worker(msg)
 
         worker = self.workers[msg.sender_id]
         if(msg.type == "WORKER_HEALTH_UPDATE"):
             worker.health = msg.status
         if(msg.type == "WORKER_ACTIVITY_UPDATE"):
             worker.running = msg.status
+
         worker.address = msg.sender_address
+        worker.last_timestamp = time.time()
     
     def monitor(self):
 
         while(self.active):
             time.sleep(1)
-            healthy = [worker for worker in self.workers if worker.healthy == 1]
+            
+            current_time = time.time()
+            for worker in self.workers:
+                if(current_time - self.workers[worker].last_timestamp > 2):
+                    self.workers[worker].health = 0
 
+            healthy_workers = [worker for worker in self.workers if self.workers[worker].healthy == 1]
             msg = Message()
+            msg.sender_id = self.id
             msg.type = "PROCESS_HEALTH_UPDATE"
-            msg.data = "Service " + str(self.family_id) + " has " + str(len(healthy)) + " healthy processes out of " + str(len(self.workers))
+            msg.data = "Service " + str(self.family_id) + " has " + str(len(healthy_workers)) + " healthy processes out of " + str(len(list(self.workers)))
             # sendmsg(msg, clientaddress)
     
     def scale(self):
 
         while(self.active):
             time.sleep(1)
-            running = [worker for worker in self.workers if worker.running == 1]
+            running = [worker for worker in self.workers if self.workers[worker].running == 1]
 
             msg = Message()
             msg.sender_id = self.id

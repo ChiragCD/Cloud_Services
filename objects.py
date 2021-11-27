@@ -24,7 +24,7 @@ class Machine(object):
         self.id = -1
         self.num_containers = 0
         self.containers = []
-        self.status = -1
+        self.health = -1
         self.address = "0.0.0.0:0"
 
 class Container(object):

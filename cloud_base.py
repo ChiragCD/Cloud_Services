@@ -85,15 +85,18 @@ class Server(object):
 
     def platform_monitor(self):
 
-        current_time = time.time()
-        for container in self.containers:
-            if(current_time - self.platform_timestamps[container.id] > 2):
-                container.health = 0
+        while(True):
+            time.sleep(1)
 
-        healthy = 0
-        for container in self.containers:
-            healthy += container.health
-        print(healthy, "healthy containers out of", len(self.containers))
+            current_time = time.time()
+            for container in self.containers:
+                if(current_time - self.platform_timestamps[container.id] > 2):
+                    container.health = 0
+
+            healthy = 0
+            for container in self.containers:
+                healthy += container.health
+            print(healthy, "healthy containers out of", len(self.containers))
 
     def infrastructure_update(self, msg):
 
@@ -108,20 +111,23 @@ class Server(object):
 
         sender = msg.sender_id
         if(type(self.entities[sender] == Machine)):
-            self.entities[sender].status = msg.status
+            self.entities[sender].health = msg.status
             self.infrastructure_timestamps[sender] = time.time()
 
     def infrastructure_monitor(self):
 
-        current_time = time.time()
-        for machine in self.machines:
-            if(current_time - self.infrastructure_timestamps[machine.id] > 2):
-                machine.status = 0
+        while(True):
+            time.sleep(1)
 
-        healthy = 0
-        for machine in self.machines:
-            healthy += machine.status
-        print(healthy, "healthy machines out of", len(self.machines))
+            current_time = time.time()
+            for machine in self.machines:
+                if(current_time - self.infrastructure_timestamps[machine.id] > 2):
+                    machine.health = 0
+
+            healthy = 0
+            for machine in self.machines:
+                healthy += machine.health
+            print(healthy, "healthy machines out of", len(self.machines))
 
     def run(self):
 
