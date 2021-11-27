@@ -49,3 +49,12 @@ class Service(object):
         self.master_node_id = -1
         self.worker_node_ids = []
         self.client_address = "0.0.0.0:0"
+
+class Process(object):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.id = -1
+        self.type = -1
+        self.family_id = -1
+        self.address = "0.0.0.0:0"

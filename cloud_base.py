@@ -52,8 +52,6 @@ class Server(object):
         msg.type = "WORKER_UP"
         UDPServerSocket.sendto(msg, ms_tuple)
 
-        pass
-
     def scaler(self):
 
         pass
