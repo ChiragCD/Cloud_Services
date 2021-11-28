@@ -55,24 +55,27 @@ class Server(object):
         #     self.entities[new_service.id].worker_process_ids.append(new_process.id)
         # self.distributer(msg, new_service.id, 2, new_process_ids, 1)
 
-    def scaler(self, service_id):
+    def scaler(self, msg, service_id):
 
         Threshold = 0.8
         Containers_up = 0
         Containers_busy = 0
-        unused_workers = []
-        Dict = {}
-        itr = 0
+        # unused_workers = []
+        # Dict = {}
+        # itr = 0
         
-        for worker_process in self.entities[service_id].worker_process_ids:
-            if self.entities[worker_process].health == 0:
-                Containers_up += 1
-                unused_workers.append(worker_process)
-                Dict[worker_process] = itr
-            if self.entities[worker_process].health == 1:
-                Containers_busy += 1
-                Containers_up += 1
-            itr += 1
+        # for worker_process in self.entities[service_id].worker_process_ids:
+        #     if self.entities[worker_process].health == 0:
+        #         Containers_up += 1
+        #         unused_workers.append(worker_process)
+        #         Dict[worker_process] = itr
+        #     if self.entities[worker_process].health == 1:
+        #         Containers_busy += 1
+        #         Containers_up += 1
+        #     itr += 1
+        
+        Containers_up = int(msg.data.split()[2])
+        Containers_busy = int(msg.data.split()[1])
 
         req = (Containers_busy-Threshold*Containers_up)/Threshold
         new_process_ids = []
@@ -135,7 +138,7 @@ class Server(object):
     def scaling_wrapper(self, msg):
 
         self.entities[self.entities[self.entities[msg.sender_id].family_id].master_process_id].address = msg.sender_address
-        Extra, new_process_ids = self.scaler(self.entities[msg.sender_id].family_id)
+        Extra, new_process_ids = self.scaler(msg, self.entities[msg.sender_id].family_id)
         print("SCALING - ", Extra, new_process_ids)
         self.distributer(msg, self.entities[msg.sender_id].family_id, Extra, new_process_ids, 1)
 
