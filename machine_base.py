@@ -71,7 +71,7 @@ class Server(object):
         
         serial_msg = pickle.dumps(msg)
         address_tuple = (address.split(":")[0], int(address.split(":")[1]))
-        self.UDPServerSocket.sendto(address_tuple, serial_msg)
+        self.UDPServerSocket.sendto(serial_msg, address_tuple)
 
     def run(self):
 
@@ -92,7 +92,7 @@ class Server(object):
             elif(msg_obj.type == "RECEIVE_MIGRATION"):
                 self.receive_migration(msg_obj)
             else:
-                print("ERROR DO NOT RECOGNIZE TYPE:"+ msg.type)
+                print("ERROR DO NOT RECOGNIZE TYPE:"+ msg_obj.type)
 
 if(__name__ == "__main__"):
 
