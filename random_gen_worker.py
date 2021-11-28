@@ -51,9 +51,7 @@ class RandomGenWorker(object):
         in_use_msg.status = 1
         self.sendmsg(self.main_server_address, in_use_msg)
 
-        a = 0
-        for i in range(100000):
-            a = a+1
+        time.sleep(5)
 
         answer = random.randint(0, 10000)
 
