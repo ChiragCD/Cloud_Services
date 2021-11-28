@@ -40,7 +40,7 @@ class Server(object):
 
     def update_client(self, msg):
         msg.address = msg.sender_address
-        service = get_service_from_worker_id(msg.sender_id) #TODO: implement this
+        service = entities[entities[msg.sender_id].type] #not sure if this is correct
         client_address = service.client_address
         client_tuple = (client_address.split(":")[0],client_address.split(":")[1])
         msg.type = "SERVICE_UP"
@@ -48,9 +48,9 @@ class Server(object):
 
     def update_master_node(self, msg):
         sender = msg.sender_id
-        container = get_container_from_id(sender) #TODO: implement this
+        container = entities[sender] 
         ms_id = container.family_id
-        ms_container = get_container_from_id(ms_id)
+        ms_container = entities[ms_id]
         ms_address = ms_container.address
         ms_tuple = (ms_address.split(":")[0],ms_address.split(":")[1])
         msg.receiver_address = ms_address
@@ -144,19 +144,17 @@ class Server(object):
         while(True):
 
             bytesAddressPair = self.UDPServerSocket.recvfrom(bufferSize)
-
             message = bytesAddressPair[0] #contains string form of object
-
             address = bytesAddressPair[1] #contains address of sender
-            
             msg_obj = pickle.loads(message)
+            msg_obj.sender_address = bytesAddressPair[0] + ':' + str(bytesAddressPair[1])
 
             if(msg_obj.type == "START_SERVICE"):
                 self.start_service(msg_obj)
-            elif(msg_obj.type == "UPDATE_CLIENT"):
-                self.update_client(msg_obj)
-            elif(msg_obj.type == "UPDATE_MASTER_NODE"):
-                self.update_master_node(msg_obj)
+            #elif(msg_obj.type == "UPDATE_CLIENT"):
+            #    self.update_client(msg_obj)
+            #elif(msg_obj.type == "UPDATE_MASTER_NODE"):
+            #    self.update_master_node(msg_obj)
             elif(msg_obj.type == "SCALING_DATA"): #idk what else to put here
                 self.scaling_wrapper(msg_obj)
             elif(msg_obj.type == "CONTAINER_HEALTH_UPDATE"):
