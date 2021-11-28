@@ -12,7 +12,7 @@ class Server(object):
         self.entities = dict()
         self.id = 1
         self.entities[1] = self
-        
+
         self.machines = []
         self.containers = []
         self.platform_timestamps = dict()
@@ -103,7 +103,7 @@ class Server(object):
     def run(self):
 
         ## convert udp message to Message object before passing to functions
-        localIP     = "127.0.0.1"
+        localIP     = "0.0.0.0"
         localPort   = 20001
         bufferSize  = 1024
 
@@ -118,14 +118,10 @@ class Server(object):
             message = bytesAddressPair[0] #contains string form of object
             address = bytesAddressPair[1] #contains address of sender
             msg_obj = pickle.loads(message)
-            msg_obj.sender_address = bytesAddressPair[0] + ':' + str(bytesAddressPair[1])
+            msg_obj.sender_address = bytesAddressPair[1][0] + ':' + str(bytesAddressPair[1][1])
 
             if(msg_obj.type == "START_SERVICE"):
                 self.start_service(msg_obj)
-            #elif(msg_obj.type == "UPDATE_CLIENT"):
-            #    self.update_client(msg_obj)
-            #elif(msg_obj.type == "UPDATE_MASTER_NODE"):
-            #    self.update_master_node(msg_obj)
             elif(msg_obj.type == "SCALING_DATA"): #idk what else to put here
                 self.scaling_wrapper(msg_obj)
             elif(msg_obj.type == "CONTAINER_HEALTH_UPDATE"):
@@ -133,7 +129,7 @@ class Server(object):
             elif(msg_obj.type == "MACHINE_HEALTH_UPDATE"):
                 self.infrastructure_update(msg_obj)
             else:
-                print("ERROR DO NOT RECOGNIZE TYPE:"+ msg.type)
+                print("ERROR DO NOT RECOGNIZE TYPE:"+ msg_obj.type)
         pass
 
 if(__name__ == "__main__"):
