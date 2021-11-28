@@ -9,30 +9,8 @@ class Server(object):
     def __init__(self) -> None:
         super().__init__()
 
-        self.entities = dict()
         self.id = 1
-        self.entities[1] = self
-
-        # machine1 = Machine()
-        # machine1.id = 11
-        # self.entities[11] = machine1
-        # machine1.address = "0.0.0.0:0"
-
-        # machine2 = Machine()
-        # machine2.id = 12
-        # self.entities[12] = machine2
-        # machine2.address = "0.0.0.0:0"
-
-        # machine3 = Machine()
-        # machine3.id = 13
-        # self.entities[13] = machine3
-        # machine3.address = "0.0.0.0:0"
-
-        # self.machines = [machine1, machine2, machine3]
-        self.machines = []
-        self.containers = []
-        self.platform_timestamps = dict()
-        self.infrastructure_timestamps = dict()
+        self.containers = dict()
     
     def start_service(self, msg):
 
@@ -57,77 +35,35 @@ class Server(object):
         msg.type = "WORKER_UP"
         self.UDPServerSocket.sendto(msg, ms_tuple)
 
-    def scaler(self):
+    def add_container(self):
 
         pass
 
-    def distributer(self):
+    def remove_container(self):
 
         pass
-
-    def scaling_wrapper(self, msg):
-
-        pass
-
-    def platform_update(self, msg):
-
-        sender = msg.sender_id
-
-        if(sender not in self.entities):
-            container = Container()
-            container.id = msg.sender_id
-            self.entities[sender] = container
-            self.containers.append(container)
-
-        if(type(self.entities[sender] == Container)):
-            self.entities[sender].health = msg.status
-            self.platform_timestamps[sender] = time.time()
 
     def platform_monitor(self):
 
         while(True):
             time.sleep(1)
 
-            current_time = time.time()
-            for container in self.containers:
-                if(current_time - self.platform_timestamps[container.id] > 2):
-                    container.health = 0
+            msg = Message()
+            msg.type = "CONTAINER_HEALTH_UPDATE"
+            msg.sender_id = self.id
+            msg.status = 1
+            self.sendmsg(self.main_server_address, msg)
 
-            healthy = 0
-            for container in self.containers:
-                healthy += container.health
-            print(healthy, "healthy containers out of", len(self.containers))
-
-    def infrastructure_update(self, msg):
-
-        sender = msg.sender_id
-
-        if(sender not in self.entities):
-            machine = Machine()
-            machine.id = msg.sender_id
-            machine.address = msg.sender_address
-            self.entities[sender] = machine
-            self.machines.append(machine)
-
-        sender = msg.sender_id
-        if(type(self.entities[sender] == Machine)):
-            self.entities[sender].health = msg.status
-            self.infrastructure_timestamps[sender] = time.time()
-
-    def infrastructure_monitor(self):
+    def infrastructure_heartbeat(self):
 
         while(True):
             time.sleep(1)
 
-            current_time = time.time()
-            for machine in self.machines:
-                if(current_time - self.infrastructure_timestamps[machine.id] > 2):
-                    machine.health = 0
-
-            healthy = 0
-            for machine in self.machines:
-                healthy += machine.health
-            print(healthy, "healthy machines out of", len(self.machines))
+            msg = Message()
+            msg.type = "MACHINE_HEALTH_UPDATE"
+            msg.sender_id = self.id
+            msg.status = 1
+            self.sendmsg(self.main_server_address, msg)
 
     def sendmsg(self, address, msg):
         
