@@ -4,6 +4,7 @@ import pickle
 import threading
 import time
 import sys
+import docker
 
 class Server(object):
 
@@ -13,8 +14,12 @@ class Server(object):
         self.id = sys.argv[1]
         self.address = sys.argv[2]
         self.cloud_base_address = sys.argv[3]
+        self.ports = 9843
+        self.client = docker.from_env()
+        self.types = ["random-docker"]
 
         self.containers = dict()
+        self.id_container_map = dict()
 
         ## convert udp message to Message object before passing to functions
         localIP     = self.address.split(":")[0]
@@ -27,8 +32,13 @@ class Server(object):
         print("UDP server up and listening")
 
     def add_container(self, msg):
-
-        pass
+        command = ["python", "random_gen_server.py", msg.process_dest_identity, msg.process_family_identity, "0.0.0.0:"+str(self.ports), msg.sender_address, msg.address]
+        self.ports += 1
+       
+        spawned_container = self.client.create(self.types[0], command)
+        self.containers[msg.container_dest_identity] = spawned_container
+       
+        spawned_container.start()
 
     def remove_container(self, msg):
 
@@ -53,7 +63,8 @@ class Server(object):
                 msg = Message()
                 msg.type = "CONTAINER_HEALTH_UPDATE"
                 msg.sender_id = container_id
-                msg.status = 1
+                if self.containers[container_id].status != "exited":
+                    msg.status = 1
                 self.sendmsg(self.cloud_base_address, msg)
 
     def infrastructure_heartbeat(self):
