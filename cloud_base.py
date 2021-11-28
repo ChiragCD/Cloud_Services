@@ -31,10 +31,10 @@ class Server(object):
         # make service obj
         new_service = Service()
         new_service.id = self.Next_Service_id
-        Next_Service_id += 1
+        self.Next_Service_id += 1
         new_service.type = int(msg.data)
-        distributer(self, new_service.id, 1, True)
-        distributer(self, new_service.id, 2, False)
+        self.distributer(self, new_service.id, 1, True)
+        self.distributer(self, new_service.id, 2, False)
 
     def scaler(self, service_id):
 
@@ -79,9 +79,10 @@ class Server(object):
                 for container in machine.containers:
                     if container.health == 0:
                         container_ids.append(container.id)
+                        msg = Message()
                         msg.receiver_address = machine.address
                         msg.id = self.Next_msg_id
-                        Next_msg_id += 1
+                        self.Next_msg_id += 1
                         if Master == True:
                             msg.type = "WAKE_UP_MASTER_NODE"
                         msg.status = 1
@@ -96,12 +97,14 @@ class Server(object):
 
         if needed < 0:
 
+            pass
+
         # make container obj
 
     def scaling_wrapper(self, msg):
 
-        Extra, new_process_ids = scaler(self.entities[msg.sender_id].family_id)
-        distributer(self.entities[msg.sender_id].family_id, Extra, new_process_ids)
+        Extra, new_process_ids = self.scaler(self.entities[msg.sender_id].family_id)
+        self.distributer(self.entities[msg.sender_id].family_id, Extra, new_process_ids)
 
     def platform_update(self, msg):
 
