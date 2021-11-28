@@ -38,7 +38,7 @@ class Server(object):
         new_process_ids.append(new_process.id)
         self.Next_Process_id += 1
         self.entities[new_service.id].worker_process_ids.append(new_process.id)
-        self.distributer(self, new_service.id, 1, new_process_ids, True)
+        self.distributer(self, new_service.id, 1, new_process_ids, "MASTER_RANDOM")
 
         # Worker
         new_process_ids = []
@@ -50,7 +50,7 @@ class Server(object):
             new_process_ids.append(new_process.id)
             self.Next_Process_id += 1
             self.entities[new_service.id].worker_process_ids.append(new_process.id)
-        self.distributer(self, new_service.id, 2, new_process_ids, False)
+        self.distributer(self, new_service.id, 2, new_process_ids, "WORKER_RANDOM")
 
     def scaler(self, service_id):
 
@@ -103,10 +103,7 @@ class Server(object):
                 msg.receiver_address = machine.address
                 msg.type = "ADD_CONTAINER"
                 msg.status = 1
-                if Master == True:
-                    msg.container_type = "MASTER"
-                else:
-                    msg.container_type = "WORKER"
+                msg.container_type = Master
                 msg.process_family_identity = service_id
                 msg.process_dest_identity = new_process_ids[itr]
                 itr += 1
