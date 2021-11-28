@@ -17,6 +17,7 @@ class Server(object):
         self.containers = []
         self.platform_timestamps = dict()
         self.infrastructure_timestamps = dict()
+
         self.Next_Service_id = 101
         self.Next_Process_id = 1001
         self.Next_msg_id = 10001
@@ -27,8 +28,29 @@ class Server(object):
         new_service.id = self.Next_Service_id
         self.Next_Service_id += 1
         new_service.type = int(msg.data)
-        self.distributer(self, new_service.id, 1, True)
-        self.distributer(self, new_service.id, 2, False)
+
+        # Master
+        new_process_ids = []
+        new_proces = Process()
+        new_process.id = self.Next_Process_id
+        new_process.type = 0 # Master
+        self.entities[new_process.id] = new_process
+        new_process_ids.append(new_process.id)
+        self.Next_Process_id += 1
+        self.entities[service_id].worker_process_ids.append(new_process.id)
+        self.distributer(self, new_service.id, 1, new_process_ids, True)
+
+        # Worker
+        new_process_ids = []
+        for x in range(2):
+            new_proces = Process()
+            new_process.id = self.Next_Process_id
+            new_process.type = 0 # Master
+            self.entities[new_process.id] = new_process
+            new_process_ids.append(new_process.id)
+            self.Next_Process_id += 1
+            self.entities[service_id].worker_process_ids.append(new_process.id)
+        self.distributer(self, new_service.id, 2, new_process_ids, False)
 
     def scaler(self, service_id):
 
@@ -56,7 +78,7 @@ class Server(object):
             for x in range(req):
                 new_process = Process()
                 new_process.id = self.Next_Process_id
-                # update the type of process
+                new_process.type = 1 # worker
                 self.entities[new_process.id] = new_process
                 new_process_ids.append(new_process.id)
                 self.Next_Process_id += 1
@@ -67,33 +89,33 @@ class Server(object):
     def distributer(self, service_id, needed, new_process_ids, Master):
 
         if needed > 0:
-            done = 0
+            itr = 0
             container_ids = []
-            for machine in self.machines:
-                for container in machine.containers:
-                    if container.health == 0:
-                        container_ids.append(container.id)
-                        msg = Message()
-                        msg.receiver_address = machine.address
-                        msg.id = self.Next_msg_id
-                        self.Next_msg_id += 1
-                        if Master == True:
-                            msg.type = "WAKE_UP_MASTER_NODE"
-                        msg.status = 1
-                        msg.conatiner_action = 1
-                        msg.container_type = 1 # 1 for master and 2 for worker
-
-                        done += 1
-                    if done == needed:
-                        break
-                if done == needed:
-                    break
+            while needed > 0:
+                cur_id = -1
+                min_val = 100000
+                for machine in self.machines:
+                    min_val > machine.num_containers:
+                        min_val = machine.num_containers
+                        cur_id = machine.id
+                msg = Message()
+                machine = self.entities[cur_id]
+                msg.receiver_address = machine.address
+                msg.type = "ADD_CONTAINER"
+                msg.status = 1
+                if Master == True:
+                    msg.container_type = "MASTER"
+                else:
+                    msg.container_type = "WORKER"
+                msg.process_family_identity = service_id
+                msg.process_dest_identity = new_process_ids[itr]
+                itr += 1
+                msg.container_dest_identity = self.Next_container_id
+                self.Next_container_id += 1
+                needed -= 1
 
         if needed < 0:
-
             pass
-
-        # make container obj
 
     def scaling_wrapper(self, msg):
 
