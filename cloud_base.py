@@ -39,7 +39,7 @@ class Server(object):
         new_process_ids.append(new_process.id)
         self.Next_Process_id += 1
         self.entities[new_service.id].worker_process_ids.append(new_process.id)
-        self.distributer(new_service.id, 1, new_process_ids, 0)
+        self.distributer(msg, new_service.id, 1, new_process_ids, 0)
 
         # Worker
         new_process_ids = []
@@ -87,7 +87,7 @@ class Server(object):
 
         return req, new_process_ids
 
-    def distributer(self, service_id, needed, new_process_ids, Master):
+    def distributer(self, msg, service_id, needed, new_process_ids, Master):
 
         if needed > 0:
             itr = 0
@@ -102,6 +102,7 @@ class Server(object):
                 msg = Message()
                 machine = self.entities[cur_id]
                 msg.receiver_address = machine.address
+                msg.address = msg.sender_address
                 msg.type = "ADD_CONTAINER"
                 msg.status = 1
                 msg.container_type = Master

@@ -49,7 +49,7 @@ class Server(object):
     def remove_container(self, msg):
 
         print("sudo docker stop " + str(msg.container_dest_identity) + " &")
-        os.system("sudo docker stop " + str(msg.container_dest_identity) + " &")
+        os.system("docker kill " + str(msg.container_dest_identity) + " &")
 
     def send_migration(self, msg):
 
@@ -112,7 +112,7 @@ class Server(object):
             message = bytesAddressPair[0] #contains string form of object
             address = bytesAddressPair[1] #contains address of sender
             msg_obj = pickle.loads(message)
-            msg_obj.sender_address = bytesAddressPair[1][0] + ':' + str(bytesAddressPair[1][0])
+            msg_obj.sender_address = bytesAddressPair[1][0] + ':' + str(bytesAddressPair[1][1])
 
             if(msg_obj.type == "ADD_CONTAINER"):
                 self.add_container(msg_obj)
