@@ -48,16 +48,15 @@ class RandomGenServer(object):
         if(not available):
             print("Dropping request")
             msg.type = "REQUEST_DROPPED"
-            ## sendmsg(msg, client)
+            sendmsg(self.client_address, msg)
         decision = random.choice(available)
         msg.type = "USER_REQUEST"
-        ## sendmsg(decision, msg)
+        sendmsg(self.workersk[decision].address, msg)
     
     def route_reply(self, msg):
 
         msg.sender_id = self.id
-        ## sendmsg(client)
-        pass
+        sendmsg(self.client_address, msg)
     
     def status_update(self, msg):
 
@@ -90,7 +89,7 @@ class RandomGenServer(object):
             msg.sender_id = self.id
             msg.type = "PROCESS_HEALTH_UPDATE"
             msg.data = "Service " + str(self.family_id) + " has " + str(len(healthy_workers)) + " healthy processes out of " + str(len(list(self.workers)))
-            # sendmsg(msg, clientaddress)
+            sendmsg(self.clientaddress, msg)
     
     def scale(self):
 
@@ -102,11 +101,38 @@ class RandomGenServer(object):
             msg.sender_id = self.id
             msg.type = "SCALING_DATA"
             msg.data = str(self.family_id) + " " + str(len(running)) + " " + str(len(self.workers))
-            # sendmsg(msg, cloudbase)
+            sendmsg(self.cloud_base_address, msg)
+    
     
     def run(self):
+        localIP     = "127.0.0.1"
+        localPort   = 20001 #can be random but would be really convenient if we could just keep it same for all apps
+        bufferSize  = 1024
 
-        pass
+        self.UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        self.UDPServerSocket.bind((localIP, localPort))
+
+
+        while(True):
+            bytesAddressPair = self.UDPServerSocket.recvfrom(bufferSize)
+            message = bytesAddressPair[0] #contains string form of object
+            address = bytesAddressPair[1] #contains address of sender
+            msg_obj = pickle.loads(message)
+            msg_obj.sender_address = bytesAddressPair[0] + ':' + str(bytesAddressPair[1])
+
+            if(msg_obj.type == "CLIENT_QUERY"):
+                self.route_request(msg_obj)
+            elif(msg_obj.type == "WORKER_REPLY"):
+                self.route_reply(msg_obj)
+            elif(msg_obj.type == "ADD_WORKER"): #idk what else to put here
+                self.add_worker(msg_obj)
+            else:
+                self.status_update(msg_obj)
+
+    def sendmsg(address, msg):
+        serial_msg = pickle.dumps(msg)
+        address_tuple = (adddress.split(":")[0], int(address.split(":")[1]))
+        UDPServerSocket.sendto(address_tuple, serial_msg)
 
 if(__name__ == "__main__"):
     server = RandomGenServer()
