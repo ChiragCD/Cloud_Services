@@ -23,9 +23,8 @@ reader.start()
 
 def start_service(choice):
     msg = Message()
-    choice_dict = {1:"RANDOM_NUMBER_GENERATOR",2:"CLOUD_SEARCH",3:"S3"}
     msg.type = "START_SERVICE"
-    msg.choice = choice_dict[choice]
+    msg.data = choice
     sendmsg(cloud_base_address, msg)
 
 def send_query(data):
