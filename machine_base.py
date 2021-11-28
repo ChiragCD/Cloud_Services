@@ -62,7 +62,7 @@ class Server(object):
     def run(self):
 
         ## convert udp message to Message object before passing to functions
-        localIP     = "127.0.0.1"
+        localIP     = "0.0.0.0"
         localPort   = 20001
         bufferSize  = 1024
 
@@ -79,18 +79,14 @@ class Server(object):
             msg_obj = pickle.loads(message)
             msg_obj.sender_address = bytesAddressPair[0] + ':' + str(bytesAddressPair[1])
 
-            if(msg_obj.type == "START_SERVICE"):
-                self.start_service(msg_obj)
-            #elif(msg_obj.type == "UPDATE_CLIENT"):
-            #    self.update_client(msg_obj)
-            #elif(msg_obj.type == "UPDATE_MASTER_NODE"):
-            #    self.update_master_node(msg_obj)
-            elif(msg_obj.type == "SCALING_DATA"): #idk what else to put here
-                self.scaling_wrapper(msg_obj)
-            elif(msg_obj.type == "CONTAINER_HEALTH_UPDATE"):
-                self.platform_update(msg_obj)
-            elif(msg_obj.type == "MACHINE_HEALTH_UPDATE"):
-                self.infrastructure_update(msg_obj)
+            if(msg_obj.type == "ADD_CONTAINER"):
+                self.add_container(msg_obj)
+            elif(msg_obj.type == "REMOVE_CONTAINER"): #idk what else to put here
+                self.remove_container(msg_obj)
+            elif(msg_obj.type == "SEND_MIGRATION"):
+                self.send_migration(msg_obj)
+            elif(msg_obj.type == "RECEIVE_MIGRATION"):
+                self.receive_migration(msg_obj)
             else:
                 self.general_update(msg_obj)
         pass
