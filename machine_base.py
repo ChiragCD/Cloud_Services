@@ -92,8 +92,7 @@ class Server(object):
             elif(msg_obj.type == "RECEIVE_MIGRATION"):
                 self.receive_migration(msg_obj)
             else:
-                self.general_update(msg_obj)
-        pass
+                print("ERROR DO NOT RECOGNIZE TYPE:"+ msg.type)
 
 if(__name__ == "__main__"):
 

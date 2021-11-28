@@ -133,7 +133,7 @@ class Server(object):
             elif(msg_obj.type == "MACHINE_HEALTH_UPDATE"):
                 self.infrastructure_update(msg_obj)
             else:
-                self.general_update(msg_obj)
+                print("ERROR DO NOT RECOGNIZE TYPE:"+ msg.type)
         pass
 
 if(__name__ == "__main__"):
