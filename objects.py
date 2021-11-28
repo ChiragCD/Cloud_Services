@@ -5,7 +5,6 @@ class Message(object):
 
         self.sender_address = "0.0.0.0:0"
         self.receiver_address = "0.0.0.0:0"
-        self.id = -1
         self.type = "NOT_INITIALIZED"
         self.sender_id = -1
         self.status = -1
@@ -25,7 +24,7 @@ class Machine(object):
         self.id = -1
         self.num_containers = 0
         self.containers = []
-        self.status = -1
+        self.health = -1
         self.address = "0.0.0.0:0"
 
 class Container(object):
