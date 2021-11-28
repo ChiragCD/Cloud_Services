@@ -13,10 +13,6 @@ class DockerInterface(object):
 		self.script_images = ["random-docker"] #Add more docker images
 		self.client = docker.from_env()
 		self.container_id_map = dict()
-		
-		# self.message = Message()
-		# self.message.id = 1
-		# self.message.type = 0
 
 	def spawn_container(self, msg):
 		container = self.client.containers.create(self.script_images[msg.type])

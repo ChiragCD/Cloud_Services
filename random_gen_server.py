@@ -111,7 +111,6 @@ class RandomGenServer(object):
             
             current_time = time.time()
             for worker in self.workers:
-                #print(current_time, self.workers[worker].last_timestamp)
                 if(current_time - self.workers[worker].last_timestamp > 2):
                     self.workers[worker].healthy = 0
 
@@ -160,7 +159,6 @@ class RandomGenServer(object):
         serial_msg = pickle.dumps(msg)
         print(address)
         address_tuple = (address.split(":")[0], int(address.split(":")[1]))
-        #print("sending message "+str(msg.__dict__)+" to address " + address)
         print(str(address_tuple))
         self.UDPServerSocket.sendto(serial_msg, address_tuple)
 

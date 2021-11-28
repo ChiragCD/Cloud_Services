@@ -4,7 +4,6 @@ import pickle
 import threading
 import time
 import sys
-#import docker
 import os
 
 class Server(object):
@@ -16,7 +15,6 @@ class Server(object):
         self.address = sys.argv[2]
         self.cloud_base_address = sys.argv[3]
         self.ports = 9843
-        # self.client = docker.from_env()
         self.types = ["server", "worker"]
         self.programs = ["random_gen_server.py", "random_gen_worker.py"]
 
@@ -38,20 +36,11 @@ class Server(object):
         if(msg.container_type == 0):
             print("sudo docker run --network host --name " + str(msg.container_dest_identity) + " -p " + str(self.ports) + ":" + str(self.ports) + " " + self.types[msg.container_type] + " python3 " + self.programs[msg.container_type] + " " + str(msg.process_dest_identity) + " " + str(msg.process_family_identity) + " " + "0.0.0.0:" + str(self.ports) + " " + msg.sender_address + " " + msg.address + " &")
             os.system("sudo docker run --network host --name " + str(msg.container_dest_identity) + " -p " + str(self.ports) + ":" + str(self.ports) + " " + self.types[msg.container_type] + " python3 " + self.programs[msg.container_type] + " " + str(msg.process_dest_identity) + " " + str(msg.process_family_identity) + " " + "0.0.0.0:" + str(self.ports) + " " + msg.sender_address + " " + msg.address + " &")
-            # command = ["python", "random_gen_server.py", msg.process_dest_identity, msg.process_family_identity, "0.0.0.0:"+str(self.ports), msg.sender_address, msg.address]
             self.ports += 1
-            print("still on")
         if(msg.container_type == 1):
             print("sudo docker run --network host --name " + str(msg.container_dest_identity) + " -p " + str(self.ports) + ":" + str(self.ports) + " " + self.types[msg.container_type] + " python3 " + self.programs[msg.container_type] + " " + str(msg.process_dest_identity) + " " + str(msg.process_family_identity) + " " + "0.0.0.0:" + str(self.ports) + " " + msg.address + " &")
             os.system("sudo docker run --network host --name " + str(msg.container_dest_identity) + " -p " + str(self.ports) + ":" + str(self.ports) + " " + self.types[msg.container_type] + " python3 " + self.programs[msg.container_type] + " " + str(msg.process_dest_identity) + " " + str(msg.process_family_identity) + " " + "0.0.0.0:" + str(self.ports) + " " + msg.address + " &")
-            # command = ["python", "random_gen_server.py", msg.process_dest_identity, msg.process_family_identity, "0.0.0.0:"+str(self.ports), msg.sender_address, msg.address]
             self.ports += 1
-            print("still on")
-       
-        #spawned_container = self.client.create(self.types[0], command)
-        #self.containers[msg.container_dest_identity] = spawned_container
-       
-        #spawned_container.start()
 
     def remove_container(self, msg):
 
@@ -109,10 +98,6 @@ class Server(object):
         msg.address = "0.0.0.0:4875"
         msg.sender_address = "0.0.0.0:20001"
 
-        #self.add_container(msg)
-        #time.sleep(5)
-        #self.remove_container(msg)
-
         while(True):
 
             bytesAddressPair = self.UDPServerSocket.recvfrom(self.bufferSize)
@@ -123,7 +108,7 @@ class Server(object):
 
             if(msg_obj.type == "ADD_CONTAINER"):
                 self.add_container(msg_obj)
-            elif(msg_obj.type == "REMOVE_CONTAINER"): #idk what else to put here
+            elif(msg_obj.type == "REMOVE_CONTAINER"):
                 self.remove_container(msg_obj)
             elif(msg_obj.type == "SEND_MIGRATION"):
                 self.send_migration(msg_obj)

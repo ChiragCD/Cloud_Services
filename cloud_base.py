@@ -23,56 +23,29 @@ class Server(object):
         self.Next_container_id = 10001
     
     def start_service(self, msg):
-        # make service obj
+        
         new_service = Service()
         new_service.id = self.Next_Service_id
         self.Next_Service_id += 1
         new_service.type = int(msg.data)
         self.entities[new_service.id] = new_service
 
-        # Master
         new_process_ids = []
         new_process = Process()
         new_process.id = self.Next_Process_id
         new_process.family_id = new_service.id
-        new_process.type = 0 # Master
+        new_process.type = 0
         self.entities[new_process.id] = new_process
         new_process_ids.append(new_process.id)
         self.Next_Process_id += 1
         self.entities[new_service.id].master_process_id = new_process.id
         self.distributer(msg, new_service.id, 1, new_process_ids, 0)
 
-        # Worker
-        # new_process_ids = []
-        # for x in range(2):
-        #     new_proces = Process()
-        #     new_process.id = self.Next_Process_id
-        #     new_process.family_id = new_service.id
-        #     new_process.type = 0 # Master
-        #     self.entities[new_process.id] = new_process
-        #     new_process_ids.append(new_process.id)
-        #     self.Next_Process_id += 1
-        #     self.entities[new_service.id].worker_process_ids.append(new_process.id)
-        # self.distributer(msg, new_service.id, 2, new_process_ids, 1)
-
     def scaler(self, msg, service_id):
 
         Threshold = 0.8
         Containers_up = 0
         Containers_busy = 0
-        # unused_workers = []
-        # Dict = {}
-        # itr = 0
-        
-        # for worker_process in self.entities[service_id].worker_process_ids:
-        #     if self.entities[worker_process].health == 0:
-        #         Containers_up += 1
-        #         unused_workers.append(worker_process)
-        #         Dict[worker_process] = itr
-        #     if self.entities[worker_process].health == 1:
-        #         Containers_busy += 1
-        #         Containers_up += 1
-        #     itr += 1
         
         Containers_up = int(msg.data.split()[2])
         Containers_busy = int(msg.data.split()[1])
@@ -232,7 +205,7 @@ class Server(object):
 
             if(msg_obj.type == "START_SERVICE"):
                 self.start_service(msg_obj)
-            elif(msg_obj.type == "SCALING_DATA"): #idk what else to put here
+            elif(msg_obj.type == "SCALING_DATA"):
                 self.scaling_wrapper(msg_obj)
             elif(msg_obj.type == "CONTAINER_HEALTH_UPDATE"):
                 self.platform_update(msg_obj)
