@@ -110,6 +110,7 @@ class Server(object):
                 msg.container_dest_identity = self.Next_container_id
                 self.Next_container_id += 1
                 needed -= 1
+                self.sendmsg(machine.address, msg)
 
         if needed < 0:
             pass
