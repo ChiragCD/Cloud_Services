@@ -7,6 +7,7 @@ from objects import Message
 udp_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 udp_socket.bind(("0.0.0.0", 4875))
 cloud_base_address = "172.17.63.61:20001"
+main_server_address = -1
 
 def read():
     while(True):
@@ -15,6 +16,8 @@ def read():
         address = bytesAddressPair[1] #contains address of sender
         msg_obj = pickle.loads(message)
         msg_obj.sender_address = bytesAddressPair[1][0] + ':' + str(bytesAddressPair[1][1])
+        if(msg_obj.type == "PROCESS_HEALTH_UPDATE"):
+            health_update(msg_obj)
         print(msg_obj.type)
         print(msg_obj.data)
 
@@ -37,6 +40,9 @@ def sendmsg(address, msg):
     serial_msg = pickle.dumps(msg)
     address_tuple = (address.split(":")[0], int(address.split(":")[1]))
     udp_socket.sendto(serial_msg, address_tuple)
+
+def health_update(msg):
+    main_server_address = msg.sender_address
 
 while(True):
     choice = input("1. Random Number Generator\n2. Cloud Search\n3. Secure Storage Service (S3)")

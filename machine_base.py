@@ -102,28 +102,28 @@ class Server(object):
         msg.address = "0.0.0.0:4875"
         msg.sender_address = "0.0.0.0:20001"
 
-        self.add_container(msg)
-        time.sleep(5)
-        self.remove_container(msg)
+        #self.add_container(msg)
+        #time.sleep(5)
+        #self.remove_container(msg)
 
-        #while(True):
+        while(True):
 
-        #    bytesAddressPair = self.UDPServerSocket.recvfrom(self.bufferSize)
-        #    message = bytesAddressPair[0] #contains string form of object
-        #    address = bytesAddressPair[1] #contains address of sender
-        #    msg_obj = pickle.loads(message)
-        #    msg_obj.sender_address = bytesAddressPair[0] + ':' + str(bytesAddressPair[1])
+            bytesAddressPair = self.UDPServerSocket.recvfrom(self.bufferSize)
+            message = bytesAddressPair[0] #contains string form of object
+            address = bytesAddressPair[1] #contains address of sender
+            msg_obj = pickle.loads(message)
+            msg_obj.sender_address = bytesAddressPair[1][0] + ':' + str(bytesAddressPair[1][0])
 
-        #    if(msg_obj.type == "ADD_CONTAINER"):
-        #        self.add_container(msg_obj)
-        #    elif(msg_obj.type == "REMOVE_CONTAINER"): #idk what else to put here
-        #        self.remove_container(msg_obj)
-        #    elif(msg_obj.type == "SEND_MIGRATION"):
-        #        self.send_migration(msg_obj)
-        #    elif(msg_obj.type == "RECEIVE_MIGRATION"):
-        #        self.receive_migration(msg_obj)
-        #    else:
-        #        print("ERROR DO NOT RECOGNIZE TYPE:"+ msg_obj.type)
+            if(msg_obj.type == "ADD_CONTAINER"):
+                self.add_container(msg_obj)
+            elif(msg_obj.type == "REMOVE_CONTAINER"): #idk what else to put here
+                self.remove_container(msg_obj)
+            elif(msg_obj.type == "SEND_MIGRATION"):
+                self.send_migration(msg_obj)
+            elif(msg_obj.type == "RECEIVE_MIGRATION"):
+                self.receive_migration(msg_obj)
+            else:
+                print("ERROR DO NOT RECOGNIZE TYPE:"+ msg_obj.type)
 
 if(__name__ == "__main__"):
 
