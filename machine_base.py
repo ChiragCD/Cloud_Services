@@ -43,16 +43,19 @@ class Server(object):
 
         pass
 
-    def platform_monitor(self):
+    def platform_heartbeat(self):
 
         while(True):
             time.sleep(1)
 
-            msg = Message()
-            msg.type = "CONTAINER_HEALTH_UPDATE"
-            msg.sender_id = self.id
-            msg.status = 1
-            self.sendmsg(self.main_server_address, msg)
+            for container_id in self.containers:
+                if(self.containers[container_id].health == 0):
+                    pass
+                msg = Message()
+                msg.type = "CONTAINER_HEALTH_UPDATE"
+                msg.sender_id = container_id
+                msg.status = 1
+                self.sendmsg(self.cloud_base_address, msg)
 
     def infrastructure_heartbeat(self):
 
@@ -63,7 +66,7 @@ class Server(object):
             msg.type = "MACHINE_HEALTH_UPDATE"
             msg.sender_id = self.id
             msg.status = 1
-            self.sendmsg(self.main_server_address, msg)
+            self.sendmsg(self.cloud_base_address, msg)
 
     def sendmsg(self, address, msg):
         
@@ -109,11 +112,11 @@ class Server(object):
 
 if(__name__ == "__main__"):
 
-    cloud_base = Server()
-    main_thread = threading.Thread(target=cloud_base.run)
-    infrastructure_monitor_thread = threading.Thread(target=cloud_base.infrastructure_monitor)
-    platform_monitor_thread = threading.Thread(target=cloud_base.platform_monitor)
+    machine_base = Server()
+    main_thread = threading.Thread(target=machine_base.run)
+    infrastructure_heartbeat_thread = threading.Thread(target=machine_base.infrastructure_heartbeat)
+    platform_heartbeat_thread = threading.Thread(target=machine_base.platform_heartbeat)
 
     main_thread.start()
-    infrastructure_monitor_thread.start()
-    platform_monitor_thread.start()
+    infrastructure_heartbeat_thread.start()
+    platform_heartbeat_thread.start()
