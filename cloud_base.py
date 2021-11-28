@@ -31,13 +31,13 @@ class Server(object):
 
         # Master
         new_process_ids = []
-        new_proces = Process()
+        new_process = Process()
         new_process.id = self.Next_Process_id
         new_process.type = 0 # Master
         self.entities[new_process.id] = new_process
         new_process_ids.append(new_process.id)
         self.Next_Process_id += 1
-        self.entities[service_id].worker_process_ids.append(new_process.id)
+        self.entities[new_service.id].worker_process_ids.append(new_process.id)
         self.distributer(self, new_service.id, 1, new_process_ids, True)
 
         # Worker
@@ -49,7 +49,7 @@ class Server(object):
             self.entities[new_process.id] = new_process
             new_process_ids.append(new_process.id)
             self.Next_Process_id += 1
-            self.entities[service_id].worker_process_ids.append(new_process.id)
+            self.entities[new_service.id].worker_process_ids.append(new_process.id)
         self.distributer(self, new_service.id, 2, new_process_ids, False)
 
     def scaler(self, service_id):
@@ -95,7 +95,7 @@ class Server(object):
                 cur_id = -1
                 min_val = 100000
                 for machine in self.machines:
-                    min_val > machine.num_containers:
+                    if(min_val > machine.num_containers):
                         min_val = machine.num_containers
                         cur_id = machine.id
                 msg = Message()
