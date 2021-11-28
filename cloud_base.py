@@ -129,6 +129,12 @@ class Server(object):
                 healthy += machine.health
             print(healthy, "healthy machines out of", len(self.machines))
 
+    def sendmsg(self, address, msg):
+        
+        serial_msg = pickle.dumps(msg)
+        address_tuple = (address.split(":")[0], int(address.split(":")[1]))
+        self.UDPServerSocket.sendto(address_tuple, serial_msg)
+
     def run(self):
 
         ## convert udp message to Message object before passing to functions
