@@ -20,7 +20,7 @@ class Server(object):
 
         self.Next_Service_id = 101
         self.Next_Process_id = 1001
-        self.Next_msg_id = 10001
+        self.Next_container_id = 10001
     
     def start_service(self, msg):
         # make service obj
@@ -28,6 +28,7 @@ class Server(object):
         new_service.id = self.Next_Service_id
         self.Next_Service_id += 1
         new_service.type = int(msg.data)
+        self.entities[new_service.id] = new_service
 
         # Master
         new_process_ids = []
@@ -38,7 +39,7 @@ class Server(object):
         new_process_ids.append(new_process.id)
         self.Next_Process_id += 1
         self.entities[new_service.id].worker_process_ids.append(new_process.id)
-        self.distributer(self, new_service.id, 1, new_process_ids, "MASTER_RANDOM")
+        self.distributer(new_service.id, 1, new_process_ids, 0)
 
         # Worker
         new_process_ids = []
@@ -50,7 +51,7 @@ class Server(object):
             new_process_ids.append(new_process.id)
             self.Next_Process_id += 1
             self.entities[new_service.id].worker_process_ids.append(new_process.id)
-        self.distributer(self, new_service.id, 2, new_process_ids, "WORKER_RANDOM")
+        self.distributer(new_service.id, 2, new_process_ids, 1)
 
     def scaler(self, service_id):
 
@@ -111,6 +112,11 @@ class Server(object):
                 self.Next_container_id += 1
                 needed -= 1
                 self.sendmsg(machine.address, msg)
+
+                new_container = Container()
+                new_container.id = msg.container_dest_identity
+                machine.num_containers += 1
+                machine.containers.append(new_container)
 
         if needed < 0:
             pass
@@ -184,7 +190,7 @@ class Server(object):
 
         serial_msg = pickle.dumps(msg)
         address_tuple = (address.split(":")[0], int(address.split(":")[1]))
-        self.UDPServerSocket.sendto(address_tuple, serial_msg)
+        self.UDPServerSocket.sendto(serial_msg, address_tuple)
 
     def run(self):
 
