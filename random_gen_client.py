@@ -37,11 +37,13 @@ def send_query(data):
     sendmsg(main_server_address, msg)
 
 def sendmsg(address, msg):
+    print(address)
     serial_msg = pickle.dumps(msg)
     address_tuple = (address.split(":")[0], int(address.split(":")[1]))
     udp_socket.sendto(serial_msg, address_tuple)
 
 def health_update(msg):
+    global main_server_address
     main_server_address = msg.sender_address
 
 while(True):

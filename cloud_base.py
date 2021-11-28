@@ -34,24 +34,26 @@ class Server(object):
         new_process_ids = []
         new_process = Process()
         new_process.id = self.Next_Process_id
+        new_process.family_id = new_service.id
         new_process.type = 0 # Master
         self.entities[new_process.id] = new_process
         new_process_ids.append(new_process.id)
         self.Next_Process_id += 1
-        self.entities[new_service.id].worker_process_ids.append(new_process.id)
+        self.entities[new_service.id].master_process_id = new_process.id
         self.distributer(msg, new_service.id, 1, new_process_ids, 0)
 
         # Worker
-        new_process_ids = []
-        for x in range(2):
-            new_proces = Process()
-            new_process.id = self.Next_Process_id
-            new_process.type = 0 # Master
-            self.entities[new_process.id] = new_process
-            new_process_ids.append(new_process.id)
-            self.Next_Process_id += 1
-            self.entities[new_service.id].worker_process_ids.append(new_process.id)
-        self.distributer(new_service.id, 2, new_process_ids, 1)
+        # new_process_ids = []
+        # for x in range(2):
+        #     new_proces = Process()
+        #     new_process.id = self.Next_Process_id
+        #     new_process.family_id = new_service.id
+        #     new_process.type = 0 # Master
+        #     self.entities[new_process.id] = new_process
+        #     new_process_ids.append(new_process.id)
+        #     self.Next_Process_id += 1
+        #     self.entities[new_service.id].worker_process_ids.append(new_process.id)
+        # self.distributer(msg, new_service.id, 2, new_process_ids, 1)
 
     def scaler(self, service_id):
 
@@ -74,6 +76,10 @@ class Server(object):
 
         req = (Containers_busy-Threshold*Containers_up)/Threshold
         new_process_ids = []
+        
+        print(self.entities[service_id].worker_process_ids)
+        if(len(self.entities[service_id].worker_process_ids) == 0):
+            req = 2
 
         if req > 0:
             for x in range(req):
@@ -87,7 +93,7 @@ class Server(object):
 
         return req, new_process_ids
 
-    def distributer(self, msg, service_id, needed, new_process_ids, Master):
+    def distributer(self, input_msg, service_id, needed, new_process_ids, Master):
 
         if needed > 0:
             itr = 0
@@ -102,7 +108,11 @@ class Server(object):
                 msg = Message()
                 machine = self.entities[cur_id]
                 msg.receiver_address = machine.address
-                msg.address = msg.sender_address
+                if(Master == 0):
+                    msg.address = input_msg.sender_address
+                if(Master == 1):
+                    msg.address = self.entities[self.entities[service_id].master_process_id].address
+                print(Master, msg.address)
                 msg.type = "ADD_CONTAINER"
                 msg.status = 1
                 msg.container_type = Master
@@ -124,8 +134,10 @@ class Server(object):
 
     def scaling_wrapper(self, msg):
 
+        self.entities[self.entities[self.entities[msg.sender_id].family_id].master_process_id].address = msg.sender_address
         Extra, new_process_ids = self.scaler(self.entities[msg.sender_id].family_id)
-        self.distributer(self.entities[msg.sender_id].family_id, Extra, new_process_ids)
+        print("SCALING - ", Extra, new_process_ids)
+        self.distributer(msg, self.entities[msg.sender_id].family_id, Extra, new_process_ids, 1)
 
     def platform_update(self, msg):
 
@@ -212,6 +224,8 @@ class Server(object):
             address = bytesAddressPair[1] #contains address of sender
             msg_obj = pickle.loads(message)
             msg_obj.sender_address = bytesAddressPair[1][0] + ':' + str(bytesAddressPair[1][1])
+
+            print(msg_obj.type, msg_obj.sender_address)
 
             if(msg_obj.type == "START_SERVICE"):
                 self.start_service(msg_obj)

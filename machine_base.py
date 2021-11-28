@@ -35,11 +35,18 @@ class Server(object):
 
     def add_container(self, msg):
 
-        print("docker run --name " + str(msg.container_dest_identity) + " -p " + str(self.ports) + ":" + str(self.ports) + " " + self.types[msg.container_type] + " python3 " + self.programs[msg.container_type] + " " + str(msg.process_dest_identity) + " " + str(msg.process_family_identity) + " " + "0.0.0.0:" + str(self.ports) + " " + msg.sender_address + " " + msg.address + " &")
-        os.system("sudo docker run --name " + str(msg.container_dest_identity) + " -p " + str(self.ports) + ":" + str(self.ports) + " " + self.types[msg.container_type] + " python3 " + self.programs[msg.container_type] + " " + str(msg.process_dest_identity) + " " + str(msg.process_family_identity) + " " + "0.0.0.0:" + str(self.ports) + " " + msg.sender_address + " " + msg.address + " &")
-        # command = ["python", "random_gen_server.py", msg.process_dest_identity, msg.process_family_identity, "0.0.0.0:"+str(self.ports), msg.sender_address, msg.address]
-        self.ports += 1
-        print("still on")
+        if(msg.container_type == 0):
+            print("docker run --name " + str(msg.container_dest_identity) + " -p " + str(self.ports) + ":" + str(self.ports) + " " + self.types[msg.container_type] + " python3 " + self.programs[msg.container_type] + " " + str(msg.process_dest_identity) + " " + str(msg.process_family_identity) + " " + "0.0.0.0:" + str(self.ports) + " " + msg.sender_address + " " + msg.address + " &")
+            os.system("sudo docker run --name " + str(msg.container_dest_identity) + " -p " + str(self.ports) + ":" + str(self.ports) + " " + self.types[msg.container_type] + " python3 " + self.programs[msg.container_type] + " " + str(msg.process_dest_identity) + " " + str(msg.process_family_identity) + " " + "0.0.0.0:" + str(self.ports) + " " + msg.sender_address + " " + msg.address + " &")
+            # command = ["python", "random_gen_server.py", msg.process_dest_identity, msg.process_family_identity, "0.0.0.0:"+str(self.ports), msg.sender_address, msg.address]
+            self.ports += 1
+            print("still on")
+        if(msg.container_type == 1):
+            print("docker run --name " + str(msg.container_dest_identity) + " -p " + str(self.ports) + ":" + str(self.ports) + " " + self.types[msg.container_type] + " python3 " + self.programs[msg.container_type] + " " + str(msg.process_dest_identity) + " " + str(msg.process_family_identity) + " " + "0.0.0.0:" + str(self.ports) + " " + msg.address + " &")
+            os.system("sudo docker run --name " + str(msg.container_dest_identity) + " -p " + str(self.ports) + ":" + str(self.ports) + " " + self.types[msg.container_type] + " python3 " + self.programs[msg.container_type] + " " + str(msg.process_dest_identity) + " " + str(msg.process_family_identity) + " " + "0.0.0.0:" + str(self.ports) + " " + msg.address + " &")
+            # command = ["python", "random_gen_server.py", msg.process_dest_identity, msg.process_family_identity, "0.0.0.0:"+str(self.ports), msg.sender_address, msg.address]
+            self.ports += 1
+            print("still on")
        
         #spawned_container = self.client.create(self.types[0], command)
         #self.containers[msg.container_dest_identity] = spawned_container

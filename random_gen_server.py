@@ -158,6 +158,7 @@ class RandomGenServer(object):
 
     def sendmsg(self, address, msg):
         serial_msg = pickle.dumps(msg)
+        print(address)
         address_tuple = (address.split(":")[0], int(address.split(":")[1]))
         #print("sending message "+str(msg.__dict__)+" to address " + address)
         print(str(address_tuple))

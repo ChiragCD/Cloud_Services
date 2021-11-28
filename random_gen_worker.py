@@ -86,20 +86,24 @@ class RandomGenWorker(object):
     def sendmsg(self, address, msg):
 
         serial_msg = pickle.dumps(msg)
+        print("Worker - ", address)
         address_tuple = (address.split(":")[0], int(address.split(":")[1]))
+        print("Worker - ", address_tuple)
         self.UDPServerSocket.sendto(serial_msg, address_tuple)
 
     def run(self):
 
 
         while(True):
+            print("Hi!")
             bytesAddressPair = self.UDPServerSocket.recvfrom(self.bufferSize)
+            print("Hi again!")
             message = bytesAddressPair[0] #contains string form of object
             address = bytesAddressPair[1] #contains address of sender
             msg_obj = pickle.loads(message)
+            print("Worker - ", msg_obj.type)
             msg_obj.sender_address = bytesAddressPair[1][0] + ':' + str(bytesAddressPair[1][1])
 
-            print(msg_obj.type)
             if(msg_obj.type == "USER_REQUEST"):
                 self.handle_request(msg_obj)
 
