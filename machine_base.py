@@ -11,35 +11,20 @@ class Server(object):
 
         self.id = 1
         self.containers = dict()
-    
-    def start_service(self, msg):
+
+    def add_container(self, msg):
 
         pass
 
-    def update_client(self, msg):
-        msg.address = msg.sender_address
-        service = entities[entities[msg.sender_id].type] #not sure if this is correct
-        client_address = service.client_address
-        client_tuple = (client_address.split(":")[0],client_address.split(":")[1])
-        msg.type = "SERVICE_UP"
-        self.UDPServerSocket.sendto(msg,client_tuple)
-
-    def update_master_node(self, msg):
-        sender = msg.sender_id
-        container = entities[sender] 
-        ms_id = container.family_id
-        ms_container = entities[ms_id]
-        ms_address = ms_container.address
-        ms_tuple = (ms_address.split(":")[0],ms_address.split(":")[1])
-        msg.receiver_address = ms_address
-        msg.type = "WORKER_UP"
-        self.UDPServerSocket.sendto(msg, ms_tuple)
-
-    def add_container(self):
+    def remove_container(self, msg):
 
         pass
 
-    def remove_container(self):
+    def send_migration(self, msg):
+        
+        pass
+
+    def receive_migration(self, msg):
 
         pass
 
