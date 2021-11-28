@@ -35,10 +35,11 @@ class Server(object):
 
     def add_container(self, msg):
 
-        print("docker run --name " + str(msg.container_dest_identity) + " -p " + str(self.ports) + ":" + str(self.ports) + " " + self.types[msg.container_type] + " python3 " + self.programs[msg.container_type] + " " + str(msg.process_dest_identity) + " " + str(msg.process_family_identity) + " " + "0.0.0.0:" + str(self.ports) + " " + msg.sender_address + " " + msg.address)
-        os.system("sudo docker run --name " + str(msg.container_dest_identity) + " -p " + str(self.ports) + ":" + str(self.ports) + " " + self.types[msg.container_type] + " python3 " + self.programs[msg.container_type] + " " + str(msg.process_dest_identity) + " " + str(msg.process_family_identity) + " " + "0.0.0.0:" + str(self.ports) + " " + msg.sender_address + " " + msg.address)
+        print("docker run --name " + str(msg.container_dest_identity) + " -p " + str(self.ports) + ":" + str(self.ports) + " " + self.types[msg.container_type] + " python3 " + self.programs[msg.container_type] + " " + str(msg.process_dest_identity) + " " + str(msg.process_family_identity) + " " + "0.0.0.0:" + str(self.ports) + " " + msg.sender_address + " " + msg.address + " &")
+        os.system("sudo docker run --name " + str(msg.container_dest_identity) + " -p " + str(self.ports) + ":" + str(self.ports) + " " + self.types[msg.container_type] + " python3 " + self.programs[msg.container_type] + " " + str(msg.process_dest_identity) + " " + str(msg.process_family_identity) + " " + "0.0.0.0:" + str(self.ports) + " " + msg.sender_address + " " + msg.address + " &")
         # command = ["python", "random_gen_server.py", msg.process_dest_identity, msg.process_family_identity, "0.0.0.0:"+str(self.ports), msg.sender_address, msg.address]
         self.ports += 1
+        print("still on")
        
         #spawned_container = self.client.create(self.types[0], command)
         #self.containers[msg.container_dest_identity] = spawned_container
@@ -47,7 +48,8 @@ class Server(object):
 
     def remove_container(self, msg):
 
-        os.system("sudo docker stop " + str(msg.container_dest_identity))
+        print("sudo docker stop " + str(msg.container_dest_identity) + " &")
+        os.system("sudo docker stop " + str(msg.container_dest_identity) + " &")
 
     def send_migration(self, msg):
 
@@ -101,7 +103,7 @@ class Server(object):
         msg.sender_address = "0.0.0.0:20001"
 
         self.add_container(msg)
-        time.sleep(1)
+        time.sleep(5)
         self.remove_container(msg)
 
         #while(True):
