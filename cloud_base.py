@@ -20,12 +20,6 @@ class Server(object):
         self.Next_Service_id = 101
         self.Next_Process_id = 1001
         self.Next_msg_id = 10001
-
-    def sendmsg(self, address, msg):
-        
-        serial_msg = pickle.dumps(msg)
-        address_tuple = (address.split(":")[0], int(address.split(":")[1]))
-        self.UDPServerSocket.sendto(address_tuple, serial_msg)
     
     def start_service(self, msg):
         # make service obj
