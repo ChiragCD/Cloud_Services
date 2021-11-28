@@ -13,22 +13,6 @@ class Server(object):
         self.id = 1
         self.entities[1] = self
 
-        machine1 = Machine()
-        machine1.id = 11
-        self.entities[11] = machine1
-        machine1.address = "0.0.0.0:0"
-
-        machine2 = Machine()
-        machine2.id = 12
-        self.entities[12] = machine2
-        machine2.address = "0.0.0.0:0"
-
-        machine3 = Machine()
-        machine3.id = 13
-        self.entities[13] = machine3
-        machine3.address = "0.0.0.0:0"
-
-        self.machines = [machine1, machine2, machine3]
         self.machines = []
         self.containers = []
         self.platform_timestamps = dict()
@@ -47,29 +31,10 @@ class Server(object):
         # make service obj
         new_service = Service()
         new_service.id = self.Next_Service_id
-        Next_Service_id += 1
+        self.Next_Service_id += 1
         new_service.type = int(msg.data)
-        distributer(self, new_service.id, 1, True)
-        distributer(self, new_service.id, 2, False)
-
-    def update_client(self, msg):
-        msg.address = msg.sender_address
-        service = entities[entities[msg.sender_id].type] #not sure if this is correct
-        client_address = service.client_address
-        client_tuple = (client_address.split(":")[0], client_address.split(":")[1])
-        msg.type = "SERVICE_UP"
-        self.UDPServerSocket.sendto(msg,client_tuple)
-
-    def update_master_node(self, msg):
-        sender = msg.sender_id
-        container = entities[sender]
-        ms_id = container.family_id
-        ms_container = entities[ms_id]
-        ms_address = ms_container.address
-        ms_tuple = (ms_address.split(":")[0],ms_address.split(":")[1])
-        msg.receiver_address = ms_address
-        msg.type = "WORKER_UP"
-        self.UDPServerSocket.sendto(msg, ms_tuple)
+        self.distributer(self, new_service.id, 1, True)
+        self.distributer(self, new_service.id, 2, False)
 
     def scaler(self, service_id):
 
@@ -114,9 +79,10 @@ class Server(object):
                 for container in machine.containers:
                     if container.health == 0:
                         container_ids.append(container.id)
+                        msg = Message()
                         msg.receiver_address = machine.address
                         msg.id = self.Next_msg_id
-                        Next_msg_id += 1
+                        self.Next_msg_id += 1
                         if Master == True:
                             msg.type = "WAKE_UP_MASTER_NODE"
                         msg.status = 1
@@ -131,12 +97,14 @@ class Server(object):
 
         if needed < 0:
 
+            pass
+
         # make container obj
 
     def scaling_wrapper(self, msg):
 
-        Extra, new_process_ids = scaler(self.entities[msg.sender_id].family_id)
-        distributer(self.entities[msg.sender_id].family_id, Extra, new_process_ids)
+        Extra, new_process_ids = self.scaler(self.entities[msg.sender_id].family_id)
+        self.distributer(self.entities[msg.sender_id].family_id, Extra, new_process_ids)
 
     def platform_update(self, msg):
 
