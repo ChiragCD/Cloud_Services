@@ -5,7 +5,6 @@ class Message(object):
 
         self.sender_address = "0.0.0.0:0"
         self.receiver_address = "0.0.0.0:0"
-        self.id = -1
         self.type = "NOT_INITIALIZED"
         self.sender_id = -1
         self.status = -1

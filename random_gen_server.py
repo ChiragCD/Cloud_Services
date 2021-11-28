@@ -2,6 +2,8 @@ import sys
 import threading
 import time
 import random
+import socket
+import pickle
 
 from objects import Message
 
@@ -25,7 +27,7 @@ class RandomGenServer(object):
 
         self.id = int(sys.argv[1])
         self.family_id = int(sys.argv[2])
-        self.address = "0.0.0.0:" + str(sys.argv[3])
+        self.address = "127.0.0.1:" + str(sys.argv[3])
         self.cloud_base_address = str(sys.argv[4])
         self.client_address = str(sys.argv[5])
 
@@ -48,15 +50,15 @@ class RandomGenServer(object):
         if(not available):
             print("Dropping request")
             msg.type = "REQUEST_DROPPED"
-            sendmsg(self.client_address, msg)
+            self.sendmsg(self.client_address, msg)
         decision = random.choice(available)
         msg.type = "USER_REQUEST"
-        sendmsg(self.workersk[decision].address, msg)
+        self.sendmsg(self.workersk[decision].address, msg)
     
     def route_reply(self, msg):
 
         msg.sender_id = self.id
-        sendmsg(self.client_address, msg)
+        self.sendmsg(self.client_address, msg)
     
     def status_update(self, msg):
 
@@ -89,7 +91,7 @@ class RandomGenServer(object):
             msg.sender_id = self.id
             msg.type = "PROCESS_HEALTH_UPDATE"
             msg.data = "Service " + str(self.family_id) + " has " + str(len(healthy_workers)) + " healthy processes out of " + str(len(list(self.workers)))
-            sendmsg(self.clientaddress, msg)
+            self.sendmsg(self.clientaddress, msg)
     
     def scale(self):
 
@@ -101,12 +103,12 @@ class RandomGenServer(object):
             msg.sender_id = self.id
             msg.type = "SCALING_DATA"
             msg.data = str(self.family_id) + " " + str(len(running)) + " " + str(len(self.workers))
-            sendmsg(self.cloud_base_address, msg)
+            self.sendmsg(self.cloud_base_address, msg)
     
     
     def run(self):
-        localIP     = "127.0.0.1"
-        localPort   = 20001 #can be random but would be really convenient if we could just keep it same for all apps
+        localIP     = self.address.split(":")[0]
+        localPort   = int(self.address.split(":")[1]) #can be random but would be really convenient if we could just keep it same for all apps
         bufferSize  = 1024
 
         self.UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
@@ -120,7 +122,7 @@ class RandomGenServer(object):
             msg_obj = pickle.loads(message)
             msg_obj.sender_address = bytesAddressPair[0] + ':' + str(bytesAddressPair[1])
 
-            if(msg_obj.type == "CLIENT_QUERY"):
+            if(msg_obj.type == "CLIENT_REQUEST"):
                 self.route_request(msg_obj)
             elif(msg_obj.type == "WORKER_REPLY"):
                 self.route_reply(msg_obj)
@@ -129,10 +131,10 @@ class RandomGenServer(object):
             else:
                 self.status_update(msg_obj)
 
-    def sendmsg(address, msg):
+    def sendmsg(self, address, msg):
         serial_msg = pickle.dumps(msg)
-        address_tuple = (adddress.split(":")[0], int(address.split(":")[1]))
-        UDPServerSocket.sendto(address_tuple, serial_msg)
+        address_tuple = (address.split(":")[0], int(address.split(":")[1]))
+        self.UDPServerSocket.sendto(address_tuple, serial_msg)
 
 if(__name__ == "__main__"):
     server = RandomGenServer()
