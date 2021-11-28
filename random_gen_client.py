@@ -34,7 +34,7 @@ def send_query(data):
     msg = Message()
     msg.type = "CLIENT_REQUEST"
     msg.data = data
-    sendmsg(cloud_base_address, msg)
+    sendmsg(main_server_address, msg)
 
 def sendmsg(address, msg):
     serial_msg = pickle.dumps(msg)
