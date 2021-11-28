@@ -3,14 +3,28 @@ import socket
 import pickle
 import threading
 import time
+import sys
 
 class Server(object):
 
     def __init__(self) -> None:
         super().__init__()
 
-        self.id = 1
+        self.id = sys.argv[1]
+        self.address = sys.argv[2]
+        self.cloud_base_address = sys.argv[3]
+
         self.containers = dict()
+
+        ## convert udp message to Message object before passing to functions
+        localIP     = self.address.split(":")[0]
+        localPort   = int(self.address.split(":")[1])
+        self.bufferSize  = 1024
+
+        self.UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        self.UDPServerSocket.bind((localIP, localPort))
+
+        print("UDP server up and listening")
 
     def add_container(self, msg):
 
@@ -21,7 +35,7 @@ class Server(object):
         pass
 
     def send_migration(self, msg):
-        
+
         pass
 
     def receive_migration(self, msg):
@@ -61,19 +75,9 @@ class Server(object):
 
     def run(self):
 
-        ## convert udp message to Message object before passing to functions
-        localIP     = "127.0.0.1"
-        localPort   = 20001
-        bufferSize  = 1024
-
-        self.UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-        self.UDPServerSocket.bind((localIP, localPort))
-
-        print("UDP server up and listening")
-
         while(True):
 
-            bytesAddressPair = self.UDPServerSocket.recvfrom(bufferSize)
+            bytesAddressPair = self.UDPServerSocket.recvfrom(self.bufferSize)
             message = bytesAddressPair[0] #contains string form of object
             address = bytesAddressPair[1] #contains address of sender
             msg_obj = pickle.loads(message)
