@@ -69,7 +69,7 @@ class RandomGenServer(object):
 
         worker = self.workers[msg.sender_id]
         if(msg.type == "WORKER_HEALTH_UPDATE"):
-            worker.health = msg.status
+            worker.healthy = msg.status
         if(msg.type == "WORKER_ACTIVITY_UPDATE"):
             worker.running = msg.status
 

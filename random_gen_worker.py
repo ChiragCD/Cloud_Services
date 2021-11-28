@@ -16,13 +16,18 @@ class RandomGenWorker(object):
 
         self.id = int(sys.argv[1])
         self.family_id = int(sys.argv[2])
-        self.address = "127.0.0.1:" + str(sys.argv[3])
-        self.cloud_base_address = str(sys.argv[4])
-        self.client_address = str(sys.argv[5])
-        self.main_server_address = str(sys.argv[6])
+        self.address = str(sys.argv[3])
+        self.main_server_address = str(sys.argv[4])
 
+        localIP     = self.address.split(":")[0]
+        localPort   = int(self.address.split(":")[1]) #can be random but would be really convenient if we could just keep it same for all apps
+        self.bufferSize  = 1024
+
+        self.UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        self.UDPServerSocket.bind((localIP, localPort))
 
     def handle_request(self, msg):
+        print("Genning number")
         in_use_msg = Message()
         in_use_msg.sender_id = self.id
         in_use_msg.type = "WORKER_ACTIVITY_UPDATE"
@@ -60,30 +65,26 @@ class RandomGenWorker(object):
             msg.type = "WORKER_HEALTH_UPDATE"
             msg.sender_id = self.id
             msg.status = 1
-            self.sendmsg(msg, self.main_server_address)
+            self.sendmsg(self.main_server_address, msg)
     
     def sendmsg(self, address, msg):
+
         serial_msg = pickle.dumps(msg)
         address_tuple = (address.split(":")[0], int(address.split(":")[1]))
-        self.UDPServerSocket.sendto(address_tuple, serial_msg)
+        self.UDPServerSocket.sendto(serial_msg, address_tuple)
 
     def run(self):
-        localIP     = self.address.split(":")[0]
-        localPort   = int(self.address.split(":")[1]) #can be random but would be really convenient if we could just keep it same for all apps
-        bufferSize  = 1024
-
-        self.UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-        self.UDPServerSocket.bind((localIP, localPort))
 
 
         while(True):
-            bytesAddressPair = self.UDPServerSocket.recvfrom(bufferSize)
+            bytesAddressPair = self.UDPServerSocket.recvfrom(self.bufferSize)
             message = bytesAddressPair[0] #contains string form of object
             address = bytesAddressPair[1] #contains address of sender
             msg_obj = pickle.loads(message)
-            msg_obj.sender_address = bytesAddressPair[0] + ':' + str(bytesAddressPair[1])
+            msg_obj.sender_address = bytesAddressPair[1][0] + ':' + str(bytesAddressPair[1][1])
 
-            if(msg_obj.type == "CLIENT_REQUEST"):
+            print(msg_obj.type)
+            if(msg_obj.type == "USER_REQUEST"):
                 self.handle_request(msg_obj)
 
         pass
