@@ -1,1 +1,3 @@
 Cloud_Services
+
+A cloud orchestrator setup, to run services across systems on a cluster. Systems can dynamically register with or leave the cluster. The orchestrator (in cloud_base.py) assigns tasks to systems, that then run relevant docker containers. The orchestrator may apply auto-scaling under high or low loads, and monitors the health and workload of each system. A counterpart to the orchestrator (machine_base.py) on each system acts as the setup's representative on that system, incorporating instructions from the orchestrator. A sample service is provided in random_gen_server.py and random_gen_worker.py, these being capable of communicating over the network. Refer Design Doc.pdf for further details.
